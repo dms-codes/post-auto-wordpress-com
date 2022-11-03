@@ -37,34 +37,41 @@ def create_wp_post(wp,title, content,post_tags=' ', categories=' '):
     #return post.link
 
 def get_hashtag(title):
-    hashtag = ''
-    for t in title.lower().split(' '):
-        if t[0] not in '0123456789':
-            hashtag +=f'#{t} '
-    return hashtag
+    try:
+        title = title.replace(':','')
+        hashtag = ''
+        for t in title.lower().split(' '):
+            if t[0] not in '0123456789- ':
+                if not t.startswith('by'):
+                    hashtag +=f'#{t} '
+        return hashtag
+    except:
+        return ''
     
 def get_content(title,url,deskripsi,img):
-    html = f'<h1>{title}</h1><br>'
-    html += f'<a href="{url}>{url}</a><br>'
     hashtag = get_hashtag(title)
+    html = f'<h1>{title} {hashtag}</h1><br>'
+    html += f'<a href="{url}>{url}</a><br>'
     html += f'<p>{hashtag}</p><br><br>'
     html += f'<p>{deskripsi}</p><br>'
     html += f'<img src="{img}"></img>'
-    return html
+    return html, hashtag
 
-def run():
+def run(startfrom):
     wp = get_wp_client()
     df = read_xlsx()
+    df = df[startfrom:]
     for index,data in df.iterrows():
         title = data['Nama Produk']
         url = data['URL']
         deskripsi = data['Deskripsi Produk']
         img = data['Gambar 1*']
-        content = get_content(title,url,deskripsi,img)
-        print(content)
-        create_wp_post(wp,title,content)
-        time.sleep(5*60)
+        content,hashtag = get_content(title,url,deskripsi,img)
+        print(index,title)
+        create_wp_post(wp,f'{title} {hashtag}',content)
+        time.sleep(2*60)
+        #content = '<b> Hello World 123</b>'
         
 if __name__ == '__main__':
     #read_xlsx()
-    run()
+    run(293)
