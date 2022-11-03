@@ -5,6 +5,8 @@ from conf import *
 import pandas as pd 
 import time
 
+HASHTAG_REPLACE_CHARS = ['(',')',':',';','!','#','%','^','&','*','{','}',
+                         '[',']','<','>',',','.','?','/','-',' ']
 COLUMNS = ['Error Message', 'Product ID', 'Nama Produk', 'URL', 'Deskripsi Produk',
        'Minimum Pemesanan *', 'Etalase Kode', 'Waktu Proses Preorder',
        'Kondisi*', 'Asuransi Pengiriman*', 'Gambar 1*', 'Gambar 2', 'Gambar 3',
@@ -37,13 +39,19 @@ def create_wp_post(wp,title, content,post_tags=' ', categories=' '):
     #return post.link
 
 def get_hashtag(title):
+    checkwords = ['by','dalam','in','untuk','for','kepada','to','ke','from','pada','above','on','into',
+                  'di','dan','and','or','through',
+                  'atau','lewat','melalui','terhadap',
+                  'para','oleh','yang',
+                  'sekitar','dengan','seputar']
     try:
         title = title.replace(':','')
         hashtag = ''
         for t in title.lower().split(' '):
-            if t[0] not in '0123456789- ':
-                if not t.startswith('by'):
-                    hashtag +=f'#{t} '
+            if t not in HASHTAG_REPLACE_CHARS:
+                if t[0] not in '0123456789':
+                    if t not in checkwords:
+                        hashtag +=f'#{t} '
         return hashtag
     except:
         return ''
@@ -67,11 +75,10 @@ def run(startfrom):
         deskripsi = data['Deskripsi Produk']
         img = data['Gambar 1*']
         content,hashtag = get_content(title,url,deskripsi,img)
-        print(index,title)
+        print(f'{index}/{len(df)} {title}')
         create_wp_post(wp,f'{title} {hashtag}',content)
         time.sleep(2*60)
-        #content = '<b> Hello World 123</b>'
         
 if __name__ == '__main__':
     #read_xlsx()
-    run(293)
+    run(143)
