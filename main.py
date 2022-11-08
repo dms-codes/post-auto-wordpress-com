@@ -68,17 +68,23 @@ def get_content(title,url,deskripsi,img):
 def run(startfrom):
     wp = get_wp_client()
     df = read_xlsx()
-    df = df[startfrom:]
+    df = df[startfrom-1:]
     for index,data in df.iterrows():
         title = data['Nama Produk']
         url = data['URL']
         deskripsi = data['Deskripsi Produk']
         img = data['Gambar 1*']
         content,hashtag = get_content(title,url,deskripsi,img)
-        print(f'{index}/{len(df)} {title}')
+        start_to_finish_time = (len(df)+startfrom-1) * 2.0000 * 60 
+        passed_time = (startfrom+index) * 2.0000 * 60
+        seconds = start_to_finish_time - passed_time
+        #print(start_to_finish_time,passed_time,seconds)
+        min,sec = divmod(seconds,60)
+        hour,min = divmod(min,60)
+        print(f'{index+1}/{(len(df)+startfrom-1)} {title} {hour} hours and {min} minutes to go.')
         create_wp_post(wp,f'{title} {hashtag}',content)
         time.sleep(2*60)
         
 if __name__ == '__main__':
     #read_xlsx()
-    run(143)
+    run(107)
